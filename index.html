@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRISHNA RATHWA - Resume</title>
+    <title>KRISHNA RATHWA</title>
     
     <!-- Professional Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,12 +26,17 @@
             margin: 0; /* Removes default browser print margins */
         }
 
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: white; /* Ensures no gray bleeds into the document */
+        }
+
         .a4-page {
             width: 210mm;
             height: 297mm; /* Strictly locked to A4 height */
             background: white;
             margin: 0 auto;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
             padding: 12mm 15mm;
             box-sizing: border-box;
             font-family: 'Open Sans', sans-serif;
@@ -48,7 +53,6 @@
                 height: 297mm;
             }
             .a4-page {
-                box-shadow: none;
                 margin: 0;
                 padding: 12mm 15mm;
                 width: 210mm;
@@ -67,7 +71,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-300 py-8 text-sm">
+<body class="bg-white text-sm m-0 p-0">
 
   <!-- Download Buttons (Outside A4, Fixed to top-right) -->
   <div class="fixed top-6 right-6 flex flex-col gap-3 no-print z-50">
@@ -213,7 +217,7 @@
             <!-- Experience 1 -->
             <div>
               <div class="flex justify-between items-start mb-2.5">
-                <!-- Left Stack: Logo + Title Layout applied here -->
+                <!-- Left Stack: Logo + Title -->
                 <div class="flex items-center gap-3">
                   <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
                   <div class="flex flex-col justify-center">
@@ -221,7 +225,7 @@
                     <p class="text-[13px] text-gray-900 mt-0.5 leading-tight">Full Stack Developer Intern</p>
                   </div>
                 </div>
-                <!-- Right Stack: Location + Date Layout -->
+                <!-- Right Stack: Location + Date -->
                 <div class="text-right flex flex-col justify-center">
                   <p class="text-[12px] font-bold text-black leading-tight">Vadodara</p>
                   <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight">Oct 2023 - April 2024</p>
@@ -244,7 +248,7 @@
             <!-- Experience 2 -->
             <div>
               <div class="flex justify-between items-start mb-2.5">
-                <!-- Left Stack: Logo + Title Layout applied here -->
+                <!-- Left Stack: Logo + Title -->
                 <div class="flex items-center gap-3">
                   <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
                   <div class="flex flex-col justify-center">
@@ -252,7 +256,7 @@
                     <p class="text-[13px] text-gray-900 mt-0.5 leading-tight">SDE Intern</p>
                   </div>
                 </div>
-                <!-- Right Stack: Location + Date Layout -->
+                <!-- Right Stack: Location + Date -->
                 <div class="text-right flex flex-col justify-center">
                   <p class="text-[12px] font-bold text-black leading-tight">Vadodara</p>
                   <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight">Dec 2025 - May 2026</p>
@@ -282,7 +286,6 @@
   <!-- Download Scripts -->
   <script>
     // PDF uses native browser print. 
-    // Tip: In the print dialog, ensure "Margins" is set to "None" and "Paper Size" is "A4".
     function downloadPDF() {
         window.print();
     }
