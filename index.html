@@ -15,40 +15,75 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2canvas for JPG/PNG generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-        /* Exact A4 PDF Sizing */
+        /* Strict A4 Paper Definition */
+        @page {
+            size: A4;
+            margin: 0; /* Removes default browser print margins */
+        }
+
         .a4-page {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm; /* Strictly locked to A4 height */
             background: white;
             margin: 0 auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
             padding: 12mm 15mm;
             box-sizing: border-box;
             font-family: 'Open Sans', sans-serif;
             color: #000;
+            overflow: hidden; /* Prevents layout from breaking the page height */
         }
+
         @media print {
-            body {
-                background: white;
+            body, html {
                 margin: 0;
                 padding: 0;
+                background: white;
+                width: 210mm;
+                height: 297mm;
             }
             .a4-page {
                 box-shadow: none;
-                width: 100%;
-                min-height: auto;
-                padding: 10mm;
+                margin: 0;
+                padding: 12mm 15mm;
+                width: 210mm;
+                height: 297mm;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            /* Ensures buttons disappear when saving to PDF */
+            .no-print {
+                display: none !important;
             }
         }
+
         h1, h2, h3 {
             font-family: 'Roboto', sans-serif;
         }
     </style>
 </head>
-<body class="bg-gray-200 py-8 text-sm">
+<body class="bg-gray-300 py-8 text-sm">
 
-  <div class="a4-page relative">
+  <!-- Download Buttons (Outside A4, Fixed to top-right) -->
+  <div class="fixed top-6 right-6 flex flex-col gap-3 no-print z-50">
+      <button onclick="downloadPDF()" class="bg-red-600 text-white px-4 py-2 rounded shadow-lg hover:bg-red-700 transition font-semibold flex items-center gap-2 text-[13px]">
+          <i class="fa-solid fa-file-pdf"></i> Download PDF
+      </button>
+      <button onclick="downloadPNG()" class="bg-blue-600 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-700 transition font-semibold flex items-center gap-2 text-[13px]">
+          <i class="fa-solid fa-file-image"></i> Download PNG
+      </button>
+      <button onclick="downloadJPG()" class="bg-green-600 text-white px-4 py-2 rounded shadow-lg hover:bg-green-700 transition font-semibold flex items-center gap-2 text-[13px]">
+          <i class="fa-solid fa-image"></i> Download JPG
+      </button>
+  </div>
+
+  <!-- A4 Page Container -->
+  <div class="a4-page relative" id="resume-container">
     
     <!-- Header: Name -->
     <header class="text-center mb-4">
@@ -74,11 +109,11 @@
         </div>
         <div class="flex items-center gap-1.5">
           <i class="fa-solid fa-envelope"></i>
-          <a href="mailto:krishnarathwa04@gmail.com" class="text-black">krishnarathwa04@gmail.com</a>
+          <a href="mailto:krishnarathwa04@gmail.com" class="text-black hover:underline">krishnarathwa04@gmail.com</a>
         </div>
         <div class="flex items-center gap-1.5">
           <i class="fa-brands fa-linkedin text-[14px]"></i>
-          <a href="https://www.linkedin.com/in/rathwa-krishna" target="_blank" class="text-black">www.linkedin.com/in/rathwa-krishna</a>
+          <a href="https://www.linkedin.com/in/rathwa-krishna" target="_blank" class="text-black hover:underline">www.linkedin.com/in/rathwa-krishna</a>
         </div>
       </div>
     </div>
@@ -239,5 +274,36 @@
     </div>
 
   </div>
+
+  <!-- Download Scripts -->
+  <script>
+    // PDF uses native browser print. 
+    // Tip: In the print dialog, ensure "Margins" is set to "None" and "Paper Size" is "A4".
+    function downloadPDF() {
+        window.print();
+    }
+
+    // PNG Download
+    function downloadPNG() {
+        const element = document.getElementById('resume-container');
+        html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Krishna_Rathwa_Resume.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    // JPG Download
+    function downloadJPG() {
+        const element = document.getElementById('resume-container');
+        html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Krishna_Rathwa_Resume.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 1.0);
+            link.click();
+        });
+    }
+  </script>
 </body>
 </html>
