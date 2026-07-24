@@ -353,7 +353,7 @@
     });
 
     /* =========================================
-       3. BULLETPROOF GEMINI API FETCHER
+       3. GEMINI API WITH HEADER AUTHENTICATION
        ========================================= */
     async function generateAIContent() {
         const btn = document.getElementById('generate-btn');
@@ -361,8 +361,8 @@
         const outputDiv = document.getElementById('ai-output');
         const outputContent = document.getElementById('ai-suggestions-content');
         
-        // Provided API Key
-        const apiKey = 'AQ.Ab8RN6JCzuotcgGfCGJ4jEB44F5_ALSjlgWIPsHbk4Uv_nmFsg'; 
+        // Provided new API Key from Google AI Studio
+        const apiKey = 'AQ.Ab8RN6LbULuMmWpK1f2RDNEqXDQMPAk75rrCrq1GgHOSLTXiRA'; 
 
         const isTextMode = !document.getElementById('mode-text').classList.contains('hidden');
         let promptText = "";
@@ -413,34 +413,40 @@
             const parts = [{ text: promptText }];
             if (imagePart) parts.push(imagePart); 
 
-            // ATTEMPT 1: Stable v1 API (The definitive fix)
-            let url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            // IMPORTANT FIX: Removed ?key= from the URL entirely.
+            let url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
             
             let response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // Passing the API key inside the headers fixes the OAuth error for "AQ." keys
+                    'x-goog-api-key': apiKey 
+                },
                 body: JSON.stringify({ contents: [{ parts: parts }] })
             });
             
             let data = await response.json();
 
-            // ATTEMPT 2: If v1 fails, automatically fallback to older models
+            // Fallback for Pro if flash is restricted
             if (!response.ok) {
                 console.warn("Primary API failed. Attempting fallback...", data.error?.message);
                 const fallbackModel = imagePart ? 'gemini-1.5-pro' : 'gemini-pro';
-                url = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${apiKey}`;
+                url = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent`;
                 
                 response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-goog-api-key': apiKey
+                    },
                     body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
                 
                 data = await response.json();
                 
-                // If it STILL fails, throw the error
                 if (!response.ok) {
-                    throw new Error(data.error?.message || 'Both primary and fallback API endpoints failed.');
+                    throw new Error(data.error?.message || 'Authentication or request failed.');
                 }
             }
 
