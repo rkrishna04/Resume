@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRISHNA RATHWA</title>
+    <title>KRISHNA RATHWA - AI Resume Builder</title>
     
     <!-- Professional Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,300 +15,457 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- html2canvas for JPG/PNG generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* Strict A4 Paper Definition */
-        @page {
-            size: A4;
-            margin: 0; /* Removes default browser print margins */
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            background-color: white; /* Ensures no gray bleeds into the document */
-        }
+        @page { size: A4; margin: 0; }
+        body, html { margin: 0; padding: 0; background-color: white; }
 
         .a4-page {
             width: 210mm;
-            height: 297mm; /* Strictly locked to A4 height */
+            height: 297mm;
             background: white;
             margin: 0 auto;
             padding: 12mm 15mm;
             box-sizing: border-box;
             font-family: 'Open Sans', sans-serif;
             color: #000;
-            overflow: hidden; /* Prevents layout from breaking the page height */
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Editable fields visual cues */
+        [contenteditable="true"] {
+            outline: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        [contenteditable="true"]:hover {
+            background-color: #f0f9ff;
+            box-shadow: 0 0 0 2px #bae6fd;
+            cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            background-color: #fff;
+            box-shadow: 0 0 0 2px #3b82f6;
         }
 
         @media print {
-            body, html {
-                margin: 0;
-                padding: 0;
-                background: white;
-                width: 210mm;
-                height: 297mm;
-            }
+            body, html { margin: 0; padding: 0; background: white; width: 210mm; height: 297mm; }
             .a4-page {
-                margin: 0;
-                padding: 12mm 15mm;
-                width: 210mm;
-                height: 297mm;
-                page-break-after: avoid;
-                page-break-inside: avoid;
+                margin: 0; padding: 12mm 15mm; width: 210mm; height: 297mm;
+                page-break-after: avoid; page-break-inside: avoid;
             }
-            /* Ensures buttons disappear when saving to PDF */
-            .no-print {
-                display: none !important;
+            .no-print { display: none !important; }
+            [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+                background-color: transparent;
+                box-shadow: none;
             }
         }
-
-        h1, h2, h3 {
-            font-family: 'Roboto', sans-serif;
-        }
+        h1, h2, h3 { font-family: 'Roboto', sans-serif; }
+        
+        /* Custom scrollbar for sidebar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-white text-sm m-0 p-0">
+<body class="bg-gray-100 text-sm m-0 p-0 flex h-screen overflow-hidden">
 
-  <!-- Download Buttons (Outside A4, Fixed to top-right) -->
-  <div class="fixed top-6 right-6 flex flex-col gap-3 no-print z-50">
-      <button onclick="downloadPDF()" class="bg-red-600 text-white px-4 py-2 rounded shadow-lg hover:bg-red-700 transition font-semibold flex items-center gap-2 text-[13px]">
-          <i class="fa-solid fa-file-pdf"></i> Download PDF
-      </button>
-      <button onclick="downloadPNG()" class="bg-blue-600 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-700 transition font-semibold flex items-center gap-2 text-[13px]">
-          <i class="fa-solid fa-file-image"></i> Download PNG
-      </button>
-      <button onclick="downloadJPG()" class="bg-green-600 text-white px-4 py-2 rounded shadow-lg hover:bg-green-700 transition font-semibold flex items-center gap-2 text-[13px]">
-          <i class="fa-solid fa-image"></i> Download JPG
-      </button>
-  </div>
-
-  <!-- A4 Page Container -->
-  <div class="a4-page relative" id="resume-container">
+  <!-- =============================== -->
+  <!-- LEFT SIDE: AI TAILORING SIDEBAR -->
+  <!-- =============================== -->
+  <div id="ai-sidebar" class="w-[400px] bg-white border-r border-gray-300 shadow-2xl flex flex-col h-full no-print transform -translate-x-full transition-transform duration-300 absolute z-50 left-0 top-0">
+    <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+        <h2 class="font-bold text-lg"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume Tailor</h2>
+        <button onclick="toggleSidebar()" class="text-white hover:text-gray-300"><i class="fa-solid fa-xmark fa-lg"></i></button>
+    </div>
     
-    <!-- Header: Name -->
-    <header class="text-center mb-4">
-      <h1 class="text-[32px] font-black uppercase tracking-widest text-black m-0 leading-tight">
-        KRISHNA RATHWA
-      </h1>
-    </header>
-
-    <!-- Top Summary & Contact (Full Width) -->
-    <div class="mb-5">
-      <h2 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-        PROFESSIONAL SUMMARY
-      </h2>
-      <p class="text-[12px] leading-relaxed text-justify mb-3">
-        MCA candidate specializing in Artificial Intelligence with enterprise internship experience at Western Railway. Interested in backend development, business analysis, data analytics, technical consulting, project coordination, and enterprise IT solutions.
-      </p>
-      
-      <!-- Contact Info -->
-      <div class="flex flex-wrap justify-center gap-6 text-[12px] font-semibold text-gray-800">
-        <div class="flex items-center gap-1.5">
-          <i class="fa-solid fa-phone"></i>
-          <span>+91 91061 70271</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <i class="fa-solid fa-envelope"></i>
-          <a href="mailto:krishnarathwa04@gmail.com" class="text-black hover:underline">krishnarathwa04@gmail.com</a>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <i class="fa-brands fa-linkedin text-[14px]"></i>
-          <a href="https://www.linkedin.com/in/rathwa-krishna" target="_blank" class="text-black hover:underline">www.linkedin.com/in/rathwa-krishna</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Two-Column Layout -->
-    <div class="flex gap-6">
-      
-      <!-- LEFT COLUMN (35% width) -->
-      <div class="w-[35%] flex flex-col gap-5">
+    <div class="p-5 flex-grow overflow-y-auto">
+        <p class="text-xs text-gray-600 mb-4 leading-relaxed">Provide the job details below. Gemini AI will analyze your current resume and suggest customized summaries and bullet points.</p>
         
-        <!-- Education -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-            EDUCATION
-          </h3>
-          <div class="space-y-3">
+        <!-- Tab Navigation -->
+        <div class="flex border-b mb-5 cursor-pointer">
+            <div onclick="switchTab('text')" id="tab-text" class="flex-1 py-2 text-sm font-semibold text-center text-blue-600 border-b-2 border-blue-600">Manual Text</div>
+            <div onclick="switchTab('image')" id="tab-image" class="flex-1 py-2 text-sm font-semibold text-center text-gray-500 hover:text-blue-600">Job Image</div>
+        </div>
+
+        <!-- Text Input Mode -->
+        <div id="mode-text" class="space-y-4">
             <div>
-              <p class="font-bold text-[12px] leading-tight text-black">MCA (Artificial Intelligence)</p>
-              <p class="text-[11.5px] text-gray-700">Parul University | 2026</p>
-              <p class="text-[11px] text-gray-600 italic">First Class with Distinction</p>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Job Title</label>
+                <input type="text" id="ai-job-title" placeholder="e.g. Full Stack Developer" class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
             <div>
-              <p class="font-bold text-[12px] leading-tight text-black">BCA (Full Stack Web Development)</p>
-              <p class="text-[11.5px] text-gray-700">Parul University | 2024</p>
-              <p class="text-[11px] text-gray-600 italic">First Class with Distinction</p>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Job Description / Requirements</label>
+                <textarea id="ai-job-desc" rows="6" placeholder="Paste the job requirements here..." class="w-full border border-gray-300 p-2.5 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
             </div>
-          </div>
-        </section>
+        </div>
 
-        <!-- Certifications -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-            CERTIFICATIONS
-          </h3>
-          <div class="space-y-2 text-[11.5px] leading-snug text-gray-800">
+        <!-- Image Input Mode -->
+        <div id="mode-image" class="space-y-4 hidden">
             <div>
-              <p class="font-bold text-black">NVIDIA Deep Learning Institute</p>
-              <p>Fundamentals of Accelerated Computing with CUDA Python (In Progress)</p>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Upload Screenshot of Job Post</label>
+                <label for="job-image-upload" class="block border-2 border-dashed border-blue-300 bg-blue-50 rounded-lg p-6 text-center hover:bg-blue-100 cursor-pointer transition">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-600 mb-2"></i>
+                    <p id="upload-text" class="text-sm font-medium text-blue-800">Click to upload image</p>
+                    <input type="file" id="job-image-upload" class="hidden" accept="image/png, image/jpeg, image/webp">
+                </label>
+                <p class="text-[11px] text-gray-500 mt-2 text-justify">Gemini Vision will automatically read the text in your screenshot to tailor the resume.</p>
             </div>
-            <div>
-              <p class="font-bold text-black">IIT Bombay</p>
-              <p>- Java Programming Fundamentals</p>
-              <p>- Python Programming Essentials</p>
-            </div>
-          </div>
-        </section>
+        </div>
 
-        <!-- Languages -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-            LANGUAGES
-          </h3>
-          <p class="text-[12px] font-semibold text-gray-800">English • Hindi • Gujarati</p>
-        </section>
+        <button onclick="generateAIContent()" id="generate-btn" class="w-full mt-6 bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-robot"></i> Generate Tailored Content
+        </button>
 
-        <!-- Professional Skills -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-            PROFESSIONAL SKILLS
-          </h3>
-          <ul class="list-none text-[11.5px] text-gray-800 space-y-1 font-medium">
-            <li>• Analytical Thinking</li>
-            <li>• Business Analysis</li>
-            <li>• Requirement Analysis</li>
-            <li>• Project Coordination</li>
-            <li>• Process Improvement</li>
-            <li>• Data Modeling & Schema Design</li>
-            <li>• Stakeholder Communication</li>
-            <li>• Documentation</li>
-          </ul>
-        </section>
-      </div>
-
-      <!-- RIGHT COLUMN (65% width) -->
-      <div class="w-[65%] flex flex-col gap-5">
-        
-        <!-- Technical Skills -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
-            TECHNICAL SKILLS
-          </h3>
-          <div class="space-y-1.5 text-[12px] text-gray-800 leading-snug">
-            <p><span class="font-bold text-black block">Languages:</span> Python • Java • PHP • JavaScript</p>
-            <p><span class="font-bold text-black block">Web & Database:</span> React • HTML • CSS • REST APIs • PostgreSQL • MySQL • MongoDB • Firebase</p>
-            <p><span class="font-bold text-black block">Software Engineering:</span> RBAC • Database Design • MVC Architecture • SDLC • Multi-User Systems</p>
-          </div>
-        </section>
-
-        <!-- Work Experience -->
-        <section>
-          <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-3">
-            WORK EXPERIENCE
-          </h3>
-
-          <div class="space-y-6">
-            
-            <!-- Experience 1 -->
-            <div>
-              <div class="flex justify-between items-start mb-2.5">
-                <!-- Left Stack: Logo + Title -->
-                <div class="flex items-center gap-3">
-                  <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
-                  <div class="flex flex-col justify-center">
-                    <p class="font-bold text-[14px] text-black leading-tight">Western Railway</p>
-                    <p class="text-[13px] text-gray-900 mt-0.5 leading-tight">Full Stack Developer Intern</p>
-                  </div>
+        <!-- AI Output Area -->
+        <div id="ai-output" class="mt-6 hidden">
+            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-300 pb-2 mb-3">AI Suggestions:</h3>
+            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded text-xs leading-relaxed text-indigo-900 shadow-inner">
+                <p class="mb-2 italic text-gray-600 text-[10px]">Copy and paste these directly into your editable resume on the right.</p>
+                <div id="ai-suggestions-content" class="space-y-2">
+                    <!-- API Response will be injected here -->
                 </div>
-                <!-- Right Stack: Location + Date -->
-                <div class="text-right flex flex-col justify-center">
-                  <p class="text-[12px] font-bold text-black leading-tight">Vadodara</p>
-                  <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight">Oct 2023 - April 2024</p>
-                </div>
-              </div>
-              
-              <div class="text-[11.5px] mb-1.5 text-gray-800 bg-gray-50 p-1.5 rounded border border-gray-200">
-                <p><span class="font-bold text-black">Project:</span> WRSIMS (Western Railway Station Asset Information Management System)</p>
-                <p><span class="font-bold text-black">Tech Stack:</span> PHP • MySQL • HTML • CSS • JavaScript</p>
-              </div>
-              
-              <ul class="list-none text-[11.5px] text-gray-800 space-y-1 text-justify">
-                <li><span class="mr-1 font-bold text-black">•</span>Developed, tested, and deployed WRSIMS for Western Railway.</li>
-                <li><span class="mr-1 font-bold text-black">•</span>Digitized manual paper-based asset management workflows into a centralized web platform.</li>
-                <li><span class="mr-1 font-bold text-black">•</span>Implemented RBAC for 4 organizational user roles.</li>
-                <li><span class="mr-1 font-bold text-black">•</span>Designed a relational database schema to manage station assets, user roles, and operational records.</li>
-              </ul>
             </div>
-
-            <!-- Experience 2 -->
-            <div>
-              <div class="flex justify-between items-start mb-2.5">
-                <!-- Left Stack: Logo + Title -->
-                <div class="flex items-center gap-3">
-                  <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
-                  <div class="flex flex-col justify-center">
-                    <p class="font-bold text-[14px] text-black leading-tight">Western Railway</p>
-                    <p class="text-[13px] text-gray-900 mt-0.5 leading-tight">SDE Intern</p>
-                  </div>
-                </div>
-                <!-- Right Stack: Location + Date -->
-                <div class="text-right flex flex-col justify-center">
-                  <p class="text-[12px] font-bold text-black leading-tight">Vadodara</p>
-                  <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight">Dec 2025 - May 2026</p>
-                </div>
-              </div>
-              
-              <div class="text-[11.5px] mb-1.5 text-gray-800 bg-gray-50 p-1.5 rounded border border-gray-200">
-                <p><span class="font-bold text-black">Project:</span> NOCC ROOT (Centralized Data Storing & Management System)</p>
-                <p><span class="font-bold text-black">Tech Stack:</span> React • Python • FastAPI • PostgreSQL • Docker • Git</p>
-              </div>
-              
-              <ul class="list-none text-[11.5px] text-gray-800 space-y-1 text-justify">
-                <li><span class="mr-1 font-bold text-black">•</span>Developed NOCC ROOT, a centralized enterprise platform for managing operational data and digitizing workflows at the Network Operations Control Center (NOCC).</li>
-                <li><span class="mr-1 font-bold text-black">•</span>Designed a configurable admin dashboard that enables administrators to create dynamic modules with automatically generate database tables, schemas, and forms based on operational requirements.</li>
-                <li><span class="mr-1 font-bold text-black">•</span>Implemented Role-Based Access Control (RBAC), secure session management, and automated maintenance workflows to strengthen security, simplify administration, and support the complete data lifecycle.</li>
-              </ul>
-            </div>
-
-          </div>
-        </section>
-
-      </div>
+        </div>
     </div>
-
   </div>
 
-  <!-- Download Scripts -->
+  <!-- =============================== -->
+  <!-- RIGHT SIDE: RESUME CONTAINER    -->
+  <!-- =============================== -->
+  <div class="flex-grow overflow-y-auto relative flex justify-center py-10 bg-gray-300">
+    
+    <!-- Floating Action Buttons -->
+    <div class="fixed top-6 right-6 flex flex-col gap-3 no-print z-40">
+        <!-- AI Tailor Button -->
+        <button onclick="toggleSidebar()" class="bg-blue-900 text-white px-4 py-2 rounded shadow-xl hover:bg-blue-800 transition font-bold flex items-center gap-2 text-[13px] border border-blue-700">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Open AI Tailor
+        </button>
+        <!-- Download Buttons -->
+        <button onclick="downloadPDF()" class="bg-red-600 text-white px-4 py-2 rounded shadow-xl hover:bg-red-700 transition font-semibold flex items-center gap-2 text-[13px]">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF
+        </button>
+        <button onclick="downloadPNG()" class="bg-emerald-600 text-white px-4 py-2 rounded shadow-xl hover:bg-emerald-700 transition font-semibold flex items-center gap-2 text-[13px]">
+            <i class="fa-solid fa-file-image"></i> Download PNG
+        </button>
+    </div>
+
+    <!-- The Editable A4 Resume -->
+    <div class="a4-page relative" id="editable-resume">
+        <!-- Header -->
+        <header class="text-center mb-4">
+        <h1 class="text-[32px] font-black uppercase tracking-widest text-black m-0 leading-tight" contenteditable="true">
+            KRISHNA RATHWA
+        </h1>
+        </header>
+
+        <!-- Top Summary & Contact -->
+        <div class="mb-5">
+        <h2 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">
+            PROFESSIONAL SUMMARY
+        </h2>
+        <p class="text-[12px] leading-relaxed text-justify mb-3" contenteditable="true" id="resume-summary">
+            MCA candidate specializing in Artificial Intelligence with enterprise internship experience at Western Railway. Interested in backend development, business analysis, data analytics, technical consulting, project coordination, and enterprise IT solutions.
+        </p>
+        
+        <div class="flex flex-wrap justify-center gap-6 text-[12px] font-semibold text-gray-800">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-phone"></i><span contenteditable="true">+91 91061 70271</span></div>
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-envelope"></i><span contenteditable="true">krishnarathwa04@gmail.com</span></div>
+            <div class="flex items-center gap-1.5"><i class="fa-brands fa-linkedin text-[14px]"></i><span contenteditable="true">www.linkedin.com/in/rathwa-krishna</span></div>
+        </div>
+        </div>
+
+        <div class="flex gap-6">
+        <!-- LEFT COLUMN -->
+        <div class="w-[35%] flex flex-col gap-5">
+            <!-- Education -->
+            <section>
+            <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">EDUCATION</h3>
+            <div class="space-y-3" contenteditable="true">
+                <div>
+                <p class="font-bold text-[12px] leading-tight text-black">MCA (Artificial Intelligence)</p>
+                <p class="text-[11.5px] text-gray-700">Parul University | 2026</p>
+                <p class="text-[11px] text-gray-600 italic">First Class with Distinction</p>
+                </div>
+                <div>
+                <p class="font-bold text-[12px] leading-tight text-black">BCA (Full Stack Web Development)</p>
+                <p class="text-[11.5px] text-gray-700">Parul University | 2024</p>
+                <p class="text-[11px] text-gray-600 italic">First Class with Distinction</p>
+                </div>
+            </div>
+            </section>
+
+            <section>
+            <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">CERTIFICATIONS</h3>
+            <div class="space-y-2 text-[11.5px] leading-snug text-gray-800" contenteditable="true">
+                <div>
+                <p class="font-bold text-black">NVIDIA Deep Learning Institute</p>
+                <p>Fundamentals of Accelerated Computing with CUDA Python</p>
+                </div>
+                <div>
+                <p class="font-bold text-black">IIT Bombay</p>
+                <p>- Java Programming Fundamentals</p>
+                <p>- Python Programming Essentials</p>
+                </div>
+            </div>
+            </section>
+
+            <section>
+            <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">PROFESSIONAL SKILLS</h3>
+            <ul class="list-none text-[11.5px] text-gray-800 space-y-1 font-medium" contenteditable="true" id="resume-prof-skills">
+                <li>• Analytical Thinking</li>
+                <li>• Business Analysis</li>
+                <li>• Requirement Analysis</li>
+                <li>• Project Coordination</li>
+                <li>• Process Improvement</li>
+                <li>• Data Modeling & Schema Design</li>
+                <li>• Stakeholder Communication</li>
+            </ul>
+            </section>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="w-[65%] flex flex-col gap-5">
+            <section>
+            <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-2">TECHNICAL SKILLS</h3>
+            <div class="space-y-1.5 text-[12px] text-gray-800 leading-snug" contenteditable="true" id="resume-tech-skills">
+                <p><span class="font-bold text-black block">Languages:</span> Python • Java • PHP • JavaScript</p>
+                <p><span class="font-bold text-black block">Web & Database:</span> React • HTML • CSS • REST APIs • PostgreSQL • MySQL • MongoDB</p>
+                <p><span class="font-bold text-black block">Software Engineering:</span> RBAC • Database Design • MVC Architecture • SDLC</p>
+            </div>
+            </section>
+
+            <section>
+            <h3 class="text-[13px] font-bold uppercase tracking-wider text-gray-800 border-b border-gray-400 pb-1 mb-3">WORK EXPERIENCE</h3>
+            <div class="space-y-6">
+                <!-- Experience 1 -->
+                <div>
+                <div class="flex justify-between items-start mb-2.5">
+                    <div class="flex items-center gap-3">
+                    <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
+                    <div class="flex flex-col justify-center">
+                        <p class="font-bold text-[14px] text-black leading-tight" contenteditable="true">Western Railway</p>
+                        <p class="text-[13px] text-gray-900 mt-0.5 leading-tight" contenteditable="true">Full Stack Developer Intern</p>
+                    </div>
+                    </div>
+                    <div class="text-right flex flex-col justify-center">
+                    <p class="text-[12px] font-bold text-black leading-tight" contenteditable="true">Vadodara</p>
+                    <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight" contenteditable="true">Oct 2023 - April 2024</p>
+                    </div>
+                </div>
+                <div class="text-[11.5px] mb-1.5 text-gray-800 bg-gray-50 p-1.5 rounded border border-gray-200" contenteditable="true">
+                    <p><span class="font-bold text-black">Project:</span> WRSIMS (Asset Information Management System)</p>
+                    <p><span class="font-bold text-black">Tech Stack:</span> PHP • MySQL • HTML • CSS • JavaScript</p>
+                </div>
+                <ul class="list-none text-[11.5px] text-gray-800 space-y-1 text-justify" contenteditable="true">
+                    <li><span class="mr-1 font-bold text-black">•</span>Developed, tested, and deployed WRSIMS for Western Railway.</li>
+                    <li><span class="mr-1 font-bold text-black">•</span>Digitized manual paper-based asset management workflows.</li>
+                    <li><span class="mr-1 font-bold text-black">•</span>Implemented RBAC for 4 organizational user roles.</li>
+                </ul>
+                </div>
+
+                <!-- Experience 2 -->
+                <div>
+                <div class="flex justify-between items-start mb-2.5">
+                    <div class="flex items-center gap-3">
+                    <img src="indian-railway-logo-png_seeklogo-390907.png" alt="WR Logo" class="h-9 w-9 object-contain opacity-100">
+                    <div class="flex flex-col justify-center">
+                        <p class="font-bold text-[14px] text-black leading-tight" contenteditable="true">Western Railway</p>
+                        <p class="text-[13px] text-gray-900 mt-0.5 leading-tight" contenteditable="true">SDE Intern</p>
+                    </div>
+                    </div>
+                    <div class="text-right flex flex-col justify-center">
+                    <p class="text-[12px] font-bold text-black leading-tight" contenteditable="true">Vadodara</p>
+                    <p class="text-[11px] font-semibold text-gray-700 mt-0.5 leading-tight" contenteditable="true">Dec 2025 - May 2026</p>
+                    </div>
+                </div>
+                <div class="text-[11.5px] mb-1.5 text-gray-800 bg-gray-50 p-1.5 rounded border border-gray-200" contenteditable="true">
+                    <p><span class="font-bold text-black">Project:</span> NOCC ROOT (Centralized Data Management)</p>
+                    <p><span class="font-bold text-black">Tech Stack:</span> React • Python • FastAPI • PostgreSQL • Docker</p>
+                </div>
+                <ul class="list-none text-[11.5px] text-gray-800 space-y-1 text-justify" contenteditable="true">
+                    <li><span class="mr-1 font-bold text-black">•</span>Developed NOCC ROOT, a centralized enterprise platform for workflows.</li>
+                    <li><span class="mr-1 font-bold text-black">•</span>Designed a configurable admin dashboard to generate schemas.</li>
+                    <li><span class="mr-1 font-bold text-black">•</span>Implemented secure session management and automated workflows.</li>
+                </ul>
+                </div>
+            </div>
+            </section>
+        </div>
+        </div>
+    </div>
+  </div>
+
   <script>
-    // PDF uses native browser print. 
-    function downloadPDF() {
-        window.print();
+    /* =========================================
+       1. LIVE EDITING & AUTO-SAVE (LOCALSTORAGE)
+       ========================================= */
+    const resumeContainer = document.getElementById('editable-resume');
+
+    resumeContainer.addEventListener('input', () => {
+        localStorage.setItem('savedResumeHTML', resumeContainer.innerHTML);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedHTML = localStorage.getItem('savedResumeHTML');
+        if (savedHTML) {
+            resumeContainer.innerHTML = savedHTML;
+        }
+    });
+
+    /* =========================================
+       2. UI INTERACTIONS (SIDEBAR & TABS)
+       ========================================= */
+    function toggleSidebar() {
+        const sidebar = document.getElementById('ai-sidebar');
+        sidebar.classList.toggle('-translate-x-full');
     }
 
-    // PNG Download
+    function switchTab(tab) {
+        const textTab = document.getElementById('tab-text');
+        const imgTab = document.getElementById('tab-image');
+        const textMode = document.getElementById('mode-text');
+        const imgMode = document.getElementById('mode-image');
+
+        if (tab === 'text') {
+            textTab.classList.replace('text-gray-500', 'text-blue-600');
+            textTab.classList.add('border-b-2', 'border-blue-600');
+            imgTab.classList.replace('text-blue-600', 'text-gray-500');
+            imgTab.classList.remove('border-b-2', 'border-blue-600');
+            textMode.classList.remove('hidden');
+            imgMode.classList.add('hidden');
+        } else {
+            imgTab.classList.replace('text-gray-500', 'text-blue-600');
+            imgTab.classList.add('border-b-2', 'border-blue-600');
+            textTab.classList.replace('text-blue-600', 'text-gray-500');
+            textTab.classList.remove('border-b-2', 'border-blue-600');
+            imgMode.classList.remove('hidden');
+            textMode.classList.add('hidden');
+        }
+    }
+
+    // Update image upload text when file is selected
+    document.getElementById('job-image-upload').addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+            document.getElementById('upload-text').innerText = "Selected: " + e.target.files[0].name;
+        }
+    });
+
+    /* =========================================
+       3. GEMINI API INTEGRATION
+       ========================================= */
+    async function generateAIContent() {
+        const btn = document.getElementById('generate-btn');
+        const originalText = btn.innerHTML;
+        const outputDiv = document.getElementById('ai-output');
+        const outputContent = document.getElementById('ai-suggestions-content');
+        
+        // Provided API Key
+        const apiKey = 'AQ.Ab8RN6JCzuotcgGfCGJ4jEB44F5_ALSjlgWIPsHbk4Uv_nmFsg'; 
+        
+        // UPDATED LINE: Changed model name to 'gemini-1.5-flash-latest' to resolve the 404 API error.
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+        const isTextMode = !document.getElementById('mode-text').classList.contains('hidden');
+        let promptText = "";
+        let imagePart = null;
+
+        // Context from resume
+        const currentSummary = document.getElementById('resume-summary').innerText;
+        const currentSkills = document.getElementById('resume-tech-skills').innerText;
+
+        if (isTextMode) {
+            const jobTitle = document.getElementById('ai-job-title').value;
+            const jobDesc = document.getElementById('ai-job-desc').value;
+            
+            if (!jobTitle || !jobDesc) {
+                alert("Please enter both Job Title and Description.");
+                return;
+            }
+            promptText = `You are an expert resume writer. My current summary is: "${currentSummary}". My current skills are: "${currentSkills}". I am applying for the role of "${jobTitle}". Here is the job description: "${jobDesc}". Please provide a tailored Professional Summary (max 3 sentences) and 3 highly tailored bullet points for my work experience that align with these requirements to increase my ATS score. Format the output with bold headings using Markdown (**Summary:** and **Bullet Points:**). Keep it professional.`;
+        } else {
+            const fileInput = document.getElementById('job-image-upload');
+            if (!fileInput.files.length) {
+                alert("Please upload a screenshot of the job posting.");
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            try {
+                // Convert image to base64
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+                
+                imagePart = {
+                    inlineData: {
+                        data: base64Data,
+                        mimeType: file.type
+                    }
+                };
+                promptText = `You are an expert resume writer. My current summary is: "${currentSummary}". My current skills are: "${currentSkills}". Attached is an image of a job posting. Please extract the key requirements from the image and provide a tailored Professional Summary (max 3 sentences) and 3 highly tailored bullet points for my work experience that align with this job. Format the output with bold headings using Markdown (**Summary:** and **Bullet Points:**). Keep it professional.`;
+            } catch (e) {
+                alert("Error reading image file.");
+                return;
+            }
+        }
+
+        // Set Loading State
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing with Gemini...';
+        btn.disabled = true;
+        outputDiv.classList.add('hidden');
+
+        try {
+            // Build request payload
+            const parts = [{ text: promptText }];
+            if (imagePart) parts.push(imagePart); // Add image if uploaded
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: parts }] })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'Failed to fetch from Gemini API');
+            }
+
+            const generatedText = data.candidates[0].content.parts[0].text;
+            
+            // Format Gemini's Markdown output to basic HTML for the UI
+            let formattedHTML = generatedText
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-700 block mt-2 mb-1">$1</strong>') // Bold text
+                .replace(/\*/g, '•') // Replace asterisks with bullets
+                .replace(/\n/g, '<br>'); // Line breaks
+
+            outputContent.innerHTML = formattedHTML;
+            outputDiv.classList.remove('hidden');
+
+        } catch (error) {
+            console.error(error);
+            alert("API Error: " + error.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    /* =========================================
+       4. DOWNLOAD FUNCTIONS
+       ========================================= */
+    function downloadPDF() { window.print(); }
     function downloadPNG() {
-        const element = document.getElementById('resume-container');
-        html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
+        html2canvas(document.getElementById('editable-resume'), { scale: 3, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Krishna_Rathwa_Resume.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-    }
-
-    // JPG Download
-    function downloadJPG() {
-        const element = document.getElementById('resume-container');
-        html2canvas(element, { scale: 3, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Krishna_Rathwa_Resume.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 1.0);
-            link.click();
+            link.download = 'Krishna_Rathwa_Tailored_Resume.png';
+            link.href = canvas.toDataURL('image/png'); link.click();
         });
     }
   </script>
