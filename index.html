@@ -353,7 +353,7 @@
     });
 
     /* =========================================
-       3. GEMINI API WITH STABLE V1 ENDPOINT
+       3. BULLETPROOF GEMINI API FETCHER
        ========================================= */
     async function generateAIContent() {
         const btn = document.getElementById('generate-btn');
@@ -406,26 +406,42 @@
         }
 
         try {
-            // FIXED: Ensuring we are using v1beta and standard model naming
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating tailored content...';
             btn.disabled = true;
             outputDiv.classList.add('hidden');
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
             const parts = [{ text: promptText }];
             if (imagePart) parts.push(imagePart); 
 
-            const response = await fetch(url, {
+            // ATTEMPT 1: Stable v1 API (The definitive fix)
+            let url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            
+            let response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: parts }] })
             });
-
-            const data = await response.json();
             
+            let data = await response.json();
+
+            // ATTEMPT 2: If v1 fails, automatically fallback to older models
             if (!response.ok) {
-                throw new Error(data.error?.message || 'Failed to fetch from Gemini API');
+                console.warn("Primary API failed. Attempting fallback...", data.error?.message);
+                const fallbackModel = imagePart ? 'gemini-1.5-pro' : 'gemini-pro';
+                url = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${apiKey}`;
+                
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: parts }] })
+                });
+                
+                data = await response.json();
+                
+                // If it STILL fails, throw the error
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Both primary and fallback API endpoints failed.');
+                }
             }
 
             const generatedText = data.candidates[0].content.parts[0].text;
