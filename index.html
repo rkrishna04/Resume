@@ -300,7 +300,7 @@
 
   <script>
     /* =========================================
-       1. LIVE EDITING & AUTO-SAVE (LOCALSTORAGE)
+       1. LIVE EDITING & AUTO-SAVE
        ========================================= */
     const resumeContainer = document.getElementById('editable-resume');
 
@@ -316,7 +316,7 @@
     });
 
     /* =========================================
-       2. UI INTERACTIONS (SIDEBAR & TABS)
+       2. UI INTERACTIONS
        ========================================= */
     function toggleSidebar() {
         const sidebar = document.getElementById('ai-sidebar');
@@ -346,7 +346,6 @@
         }
     }
 
-    // Update image upload text when file is selected
     document.getElementById('job-image-upload').addEventListener('change', function(e) {
         if(e.target.files.length > 0) {
             document.getElementById('upload-text').innerText = "Selected: " + e.target.files[0].name;
@@ -354,7 +353,7 @@
     });
 
     /* =========================================
-       3. GEMINI API INTEGRATION
+       3. GEMINI API WITH STABLE V1 ENDPOINT
        ========================================= */
     async function generateAIContent() {
         const btn = document.getElementById('generate-btn');
@@ -364,9 +363,6 @@
         
         // Provided API Key
         const apiKey = 'AQ.Ab8RN6JCzuotcgGfCGJ4jEB44F5_ALSjlgWIPsHbk4Uv_nmFsg'; 
-        
-        // UPDATED LINE: Changed model name to 'gemini-1.5-flash-latest' to resolve the 404 API error.
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
         const isTextMode = !document.getElementById('mode-text').classList.contains('hidden');
         let promptText = "";
@@ -394,7 +390,6 @@
             
             const file = fileInput.files[0];
             try {
-                // Convert image to base64
                 const base64Data = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result.split(',')[1]);
@@ -402,12 +397,7 @@
                     reader.readAsDataURL(file);
                 });
                 
-                imagePart = {
-                    inlineData: {
-                        data: base64Data,
-                        mimeType: file.type
-                    }
-                };
+                imagePart = { inlineData: { data: base64Data, mimeType: file.type } };
                 promptText = `You are an expert resume writer. My current summary is: "${currentSummary}". My current skills are: "${currentSkills}". Attached is an image of a job posting. Please extract the key requirements from the image and provide a tailored Professional Summary (max 3 sentences) and 3 highly tailored bullet points for my work experience that align with this job. Format the output with bold headings using Markdown (**Summary:** and **Bullet Points:**). Keep it professional.`;
             } catch (e) {
                 alert("Error reading image file.");
@@ -415,15 +405,16 @@
             }
         }
 
-        // Set Loading State
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing with Gemini...';
-        btn.disabled = true;
-        outputDiv.classList.add('hidden');
-
         try {
-            // Build request payload
+            // FIXED: Ensuring we are using v1beta and standard model naming
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating tailored content...';
+            btn.disabled = true;
+            outputDiv.classList.add('hidden');
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
             const parts = [{ text: promptText }];
-            if (imagePart) parts.push(imagePart); // Add image if uploaded
+            if (imagePart) parts.push(imagePart); 
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -439,11 +430,11 @@
 
             const generatedText = data.candidates[0].content.parts[0].text;
             
-            // Format Gemini's Markdown output to basic HTML for the UI
+            // Format markdown to HTML
             let formattedHTML = generatedText
-                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-700 block mt-2 mb-1">$1</strong>') // Bold text
-                .replace(/\*/g, '•') // Replace asterisks with bullets
-                .replace(/\n/g, '<br>'); // Line breaks
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-700 block mt-2 mb-1">$1</strong>') 
+                .replace(/\*/g, '•') 
+                .replace(/\n/g, '<br>'); 
 
             outputContent.innerHTML = formattedHTML;
             outputDiv.classList.remove('hidden');
